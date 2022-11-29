@@ -48,29 +48,30 @@ public class assignment2{
 
             int byteRead = -1;
             while ((byteRead = inputStream.read()) != -1) {
-                String s = "";
-                s += String.format("%8s", Integer.toBinaryString(byteRead)).replaceAll(" ", "0");
+                String binaryInstruction = "";
+                binaryInstruction += String.format("%8s", Integer.toBinaryString(byteRead)).replaceAll(" ", "0");
                 for(int i = 0; i < 3; i++){
                     int in = inputStream.read();
-                    s += String.format("%8s", Integer.toBinaryString(in)).replaceAll(" ", "0");
+                    binaryInstruction += String.format("%8s", Integer.toBinaryString(in)).replaceAll(" ", "0");
                 }
-                if(opcodeToInstruction.containsKey(s.substring(0,6))){
-                    System.out.println(opcodeToInstruction.get(s.substring(0,6)).name);
+                if(opcodeToInstruction.containsKey(binaryInstruction.substring(0,6))){
+                    System.out.println(opcodeToInstruction.get(binaryInstruction.substring(0,6)).name);
                 }
-                else if(opcodeToInstruction.containsKey(s.substring(0,8))){
-                    System.out.println(opcodeToInstruction.get(s.substring(0,8)).name);
+                else if(opcodeToInstruction.containsKey(binaryInstruction.substring(0,8))){
+                    System.out.println(opcodeToInstruction.get(binaryInstruction.substring(0,8)).name);
                 }
-                else if(opcodeToInstruction.containsKey(s.substring(0,10))){
-                    System.out.println(opcodeToInstruction.get(s.substring(0,10)).name);
+                else if(opcodeToInstruction.containsKey(binaryInstruction.substring(0,10))){
+                    System.out.println(opcodeToInstruction.get(binaryInstruction.substring(0,10)).name);
                 }
-                else if(opcodeToInstruction.containsKey(s.substring(0,11))){
-                    String instructionType = opcodeToInstruction.get(s.substring(0,11)).type
+                else if(opcodeToInstruction.containsKey(binaryInstruction.substring(0,11))){
+                    String instructionName = opcodeToInstruction.get(binaryInstruction.substring(0,11)).name;
+                    char instructionType = opcodeToInstruction.get(binaryInstruction.substring(0,11)).type;
                     
                     String instruction;
                     if (instructionType == 'D') {
-                        instruction = getDTypeInstruction(s);
+                        instruction = getDTypeInstruction(instructionName, binaryInstruction);
                     } else {
-                        instruction = getRTypeInstruction(s);
+                        instruction = getRTypeInstruction(instructionName, binaryInstruction);
                     }
 
                     System.out.println(instruction);
@@ -83,12 +84,11 @@ public class assignment2{
         
     }
 
-    private static String getRTypeInstruction(String binaryInstruction){
-        String instructionName = opcodeToInstruction.get(s.substring(0,11)).name;
-        int rm = Integer.parseInt(s.substring(11, 16), 2);
-        int shamt = Integer.parseInt(s.substring(16, 22), 2);
-        int rn = Integer.parseInt(s.substring(22, 27), 2);
-        int rd = Integer.parseInt(s.substring(27), 2);
+    private static String getRTypeInstruction(String instructionName, String binaryInstruction){
+        int rm = Integer.parseInt(binaryInstruction.substring(11, 16), 2);
+        int shamt = Integer.parseInt(binaryInstruction.substring(16, 22), 2);
+        int rn = Integer.parseInt(binaryInstruction.substring(22, 27), 2);
+        int rd = Integer.parseInt(binaryInstruction.substring(27), 2);
         
         String instruction;
         if (instructionName == "LSL" || instructionName == "LSR") {
