@@ -41,6 +41,11 @@ public class assignment2{
             hm.put("11111111110", new Instruction("DUMP", 'R'));
             hm.put("11111111111", new Instruction("HALT", 'R'));
 
+
+            HashMap<Integer, String> labels = new HashMap<Integer, String>();
+            int lineNumber = 0; //keeps track of line number for instructions
+            int labelCount = 0; //keeps track of the number of labels
+
             int byteRead = -1;
             while ((byteRead = inputStream.read()) != -1) {
                 String s = "";
@@ -67,7 +72,49 @@ public class assignment2{
         }
 
         
-    }    
+    }
+
+    private static String getRTypeInstruction(String instructionName, String binaryInstruction){
+        //todo
+        return "";
+    }
+
+    private static String getITypeInstruction(String instructionName, String binaryInstruction){
+        //todo
+        return "";
+    }
+
+    private static String getBTypeInstruction(String instructionName, String binaryInstruction, int lineNumber, int labelCount, HashMap labels){
+        //todo
+        return "";
+    }
+
+    private static String getCBTypeInstruction(String instructionName, String binaryInstruction, int lineNumber, int labelCount, HashMap labels){
+        //todo
+        return "";
+    }
+
+    private static String getDTypeInstruction(String instructionName, String binaryInstruction){
+        //todo
+        return "";
+    }
+
+    /**
+     * checks to see if hashmap has label at the needed lineOfLabel
+     * if it does not add to hashmap
+     * return the label string
+     * 
+     * lineOfLabel = line of branch instruction + offset
+     */
+    private static String checkInstruction(int lineOfLabel, int labelCount, HashMap labels){
+        //todo
+        return "";
+    }
+
+    private static String getRegister(String fiveBitOpcode){
+        //todo
+        return "";
+    }
 }
 
 class Instruction{
