@@ -126,8 +126,13 @@ public class assignment2{
     }
 
     private static String getDTypeInstruction(String instructionName, String binaryInstruction){
-        //todo
-        return "";
+        int dtAddress = Integer.parseInt(binaryInstruction.substring(11, 20), 2);
+        int rn = Integer.parseInt(binaryInstruction.substring(22, 27), 2);
+        int rt = Integer.parseInt(binaryInstruction.substring(27), 2);
+
+        String instruction = instructionName + " " + rt + ", [" + rn + ", #" + dtAddress + "]";
+
+        return instruction;
     }
 
     /**
