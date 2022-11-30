@@ -42,7 +42,7 @@ public class assignment2{
             opcodeToInstruction.put("11111111111", new Instruction("HALT", 'R'));
 
 
-            HashMap<Integer, String> labels = new HashMap<Integer, String>();
+            HashMap<Integer, String> lineNumberToLabel = new HashMap<Integer, String>();
             int lineNumber = 0; //keeps track of line number for instructions
             int labelCount = 0; //keeps track of the number of labels
             String binaryInstruction = "";
@@ -55,8 +55,15 @@ public class assignment2{
                     int in = inputStream.read();
                     binaryInstruction += String.format("%8s", Integer.toBinaryString(in)).replaceAll(" ", "0");
                 }
+                
+                lineNumber++;
                 if(opcodeToInstruction.containsKey(binaryInstruction.substring(0,6))){
-                    System.out.println(opcodeToInstruction.get(binaryInstruction.substring(0,6)).name);
+                    int brAddress = Integer.parseInt(binaryInstruction.substring(6), 2);
+                    int labelLineNumber = lineNumber + brAddress;
+                    String label = getLabel(lineNumberToLabel, labelLineNumber, labelCount);
+                    instruction = opcodeToInstruction.get(binaryInstruction.substring(0, 6)).name + " " + label;
+                    
+                    System.out.println(instruction);
                 }
                 else if(opcodeToInstruction.containsKey(binaryInstruction.substring(0,8))){
                     System.out.println(opcodeToInstruction.get(binaryInstruction.substring(0,8)).name);
@@ -78,6 +85,8 @@ public class assignment2{
 
                     System.out.println(instruction);
                 }
+
+                labelCount = lineNumberToLabel.size();
             }  
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -122,12 +131,7 @@ public class assignment2{
         return instruction;
     }
 
-    private static String getBTypeInstruction(String instructionName, String binaryInstruction, int lineNumber, int labelCount, HashMap labels){
-        //todo
-        return "";
-    }
-
-    private static String getCBTypeInstruction(String instructionName, String binaryInstruction, int lineNumber, int labelCount, HashMap labels){
+    private static String getCBTypeInstruction(String instructionName, String binaryInstruction, int lineNumber, int labelCount, HashMap<Integer, String> lineNumberToLabel){
         //todo
         return "";
     }
@@ -138,20 +142,21 @@ public class assignment2{
     }
 
     /**
-     * checks to see if hashmap has label at the needed lineOfLabel
+     * checks to see if hashmap has label at the needed labelLineNumber
      * if it does not add to hashmap
      * return the label string
      * 
-     * lineOfLabel = line of branch instruction + offset
+     * labelLineNumber = line of branch instruction + offset
      */
-    private static String checkInstruction(int lineOfLabel, int labelCount, HashMap labels){
-        //todo
-        return "";
-    }
+    private static String getLabel(HashMap<Integer, String> lineNumberToLabel, int labelLineNumber, int labelCount){
+        String label = lineNumberToLabel.get(labelLineNumber);
 
-    private static String getRegister(String fiveBitOpcode){
-        //todo
-        return "";
+        if (label == null) {
+            label = "label" + labelCount;
+            lineNumberToLabel.put(labelLineNumber, label);
+        }
+
+        return label;
     }
 
     private static String numberToRegister(int registerNumber) {
