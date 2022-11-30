@@ -130,7 +130,7 @@ public class assignment2{
         int rn = Integer.parseInt(binaryInstruction.substring(22, 27), 2);
         int rt = Integer.parseInt(binaryInstruction.substring(27), 2);
 
-        String instruction = instructionName + " " + rt + ", [" + rn + ", #" + dtAddress + "]";
+        String instruction = instructionName + " " + numberToRegister(rt) + ", [" + numberToRegister(rn) + ", #" + dtAddress + "]";
 
         return instruction;
     }
