@@ -45,11 +45,12 @@ public class assignment2{
             HashMap<Integer, String> labels = new HashMap<Integer, String>();
             int lineNumber = 0; //keeps track of line number for instructions
             int labelCount = 0; //keeps track of the number of labels
+            String binaryInstruction = "";
+            String instruction;
 
             int byteRead = -1;
             while ((byteRead = inputStream.read()) != -1) {
-                String binaryInstruction = "";
-                binaryInstruction += String.format("%8s", Integer.toBinaryString(byteRead)).replaceAll(" ", "0");
+                binaryInstruction = String.format("%8s", Integer.toBinaryString(byteRead)).replaceAll(" ", "0");
                 for(int i = 0; i < 3; i++){
                     int in = inputStream.read();
                     binaryInstruction += String.format("%8s", Integer.toBinaryString(in)).replaceAll(" ", "0");
@@ -61,13 +62,14 @@ public class assignment2{
                     System.out.println(opcodeToInstruction.get(binaryInstruction.substring(0,8)).name);
                 }
                 else if(opcodeToInstruction.containsKey(binaryInstruction.substring(0,10))){
-                    System.out.println(opcodeToInstruction.get(binaryInstruction.substring(0,10)).name);
+                    instruction = getITypeInstruction(opcodeToInstruction.get(binaryInstruction.substring(0,10)).name, binaryInstruction);
+
+                    System.out.println(instruction);
                 }
                 else if(opcodeToInstruction.containsKey(binaryInstruction.substring(0,11))){
                     String instructionName = opcodeToInstruction.get(binaryInstruction.substring(0,11)).name;
                     char instructionType = opcodeToInstruction.get(binaryInstruction.substring(0,11)).type;
                     
-                    String instruction;
                     if (instructionType == 'D') {
                         instruction = getDTypeInstruction(instructionName, binaryInstruction);
                     } else {
@@ -111,8 +113,13 @@ public class assignment2{
     }
 
     private static String getITypeInstruction(String instructionName, String binaryInstruction){
-        //todo
-        return "";
+        int aluImmediate = Integer.parseInt(binaryInstruction.substring(10, 22), 2);
+        int rn = Integer.parseInt(binaryInstruction.substring(22, 27), 2);
+        int rd = Integer.parseInt(binaryInstruction.substring(27), 2);
+
+        String instruction = instructionName + " " + numberToRegister(rd) + ", " + numberToRegister(rn) + ", #" + aluImmediate;
+
+        return instruction;
     }
 
     private static String getBTypeInstruction(String instructionName, String binaryInstruction, int lineNumber, int labelCount, HashMap labels){
