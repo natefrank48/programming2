@@ -8,7 +8,6 @@ import java.util.ArrayList;
 public class assignment2{
     public static void main(String[] args)
     {   
-
         try (
             InputStream inputStream = new FileInputStream(args[0]);
         ) {
@@ -105,7 +104,7 @@ public class assignment2{
 
     private static String getRTypeInstruction(String instructionName, String binaryInstruction){
         int rm = Integer.parseInt(binaryInstruction.substring(11, 16), 2);
-        int shamt = Integer.parseInt(binaryInstruction.substring(16, 22), 2);
+        int shamt = binary2ComplimentToInt(binaryInstruction.substring(16, 22));
         int rn = Integer.parseInt(binaryInstruction.substring(22, 27), 2);
         int rd = Integer.parseInt(binaryInstruction.substring(27), 2);
         
@@ -190,13 +189,6 @@ public class assignment2{
         return instruction;
     }
 
-    /**
-     * checks to see if hashmap has label at the needed labelLineNumber
-     * if it does not add to hashmap
-     * return the label string
-     * 
-     * labelLineNumber = line of branch instruction + offset
-     */
     private static void addLabel(HashSet<Integer> linesWithLabelsHashSet, int line){
         linesWithLabelsHashSet.add(line);
     }
