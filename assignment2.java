@@ -1,14 +1,13 @@
 import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-//import java.util.Scanner;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.ArrayList;
 
 public class assignment2{
     public static void main(String[] args)
-    {
-        
-
+    {   
         try (
             InputStream inputStream = new FileInputStream(args[0]);
         ) {
@@ -18,11 +17,11 @@ public class assignment2{
             opcodeToInstruction.put("10001010000", new Instruction("AND", 'R'));
             opcodeToInstruction.put("1001001000", new Instruction("ANDI", 'I'));
             opcodeToInstruction.put("000101", new Instruction("B", 'B'));
-            opcodeToInstruction.put("01010100", new Instruction("B.cond", 'C'));
+            opcodeToInstruction.put("01010100", new Instruction("B.", 'C'));
             opcodeToInstruction.put("100101", new Instruction("BL", 'B'));
             opcodeToInstruction.put("11010110000", new Instruction("BR", 'R'));
-            opcodeToInstruction.put("10110100", new Instruction("CBNZ", 'C'));
-            opcodeToInstruction.put("10110101", new Instruction("CBZ", 'C'));
+            opcodeToInstruction.put("10110101", new Instruction("CBNZ", 'C'));
+            opcodeToInstruction.put("10110100", new Instruction("CBZ", 'C'));
             opcodeToInstruction.put("11001010000", new Instruction("EOR", 'R'));
             opcodeToInstruction.put("1101001000", new Instruction("EORI", 'I'));
             opcodeToInstruction.put("11111000010", new Instruction("LDUR", 'D'));
@@ -42,9 +41,9 @@ public class assignment2{
             opcodeToInstruction.put("11111111111", new Instruction("HALT", 'R'));
 
 
-            HashMap<Integer, String> lineNumberToLabel = new HashMap<Integer, String>();
+            HashSet<Integer> linesWithLabelsHashSet = new HashSet<Integer>();
+            ArrayList<String> instructionsList = new ArrayList<String>();
             int lineNumber = 0; //keeps track of line number for instructions
-            int labelCount = 0; //keeps track of the number of labels
             String binaryInstruction = "";
             String instruction;
 
@@ -56,22 +55,23 @@ public class assignment2{
                     binaryInstruction += String.format("%8s", Integer.toBinaryString(in)).replaceAll(" ", "0");
                 }
                 
-                lineNumber++;
+                
                 if(opcodeToInstruction.containsKey(binaryInstruction.substring(0,6))){
-                    int brAddress = Integer.parseInt(binaryInstruction.substring(6), 2);
+                    int brAddress = binary2ComplimentToInt(binaryInstruction.substring(6));
                     int labelLineNumber = lineNumber + brAddress;
-                    String label = getLabel(lineNumberToLabel, labelLineNumber, labelCount);
-                    instruction = opcodeToInstruction.get(binaryInstruction.substring(0, 6)).name + " " + label;
+                    addLabel(linesWithLabelsHashSet, lineNumber + brAddress);
+                    instruction = opcodeToInstruction.get(binaryInstruction.substring(0, 6)).name + " label" + (lineNumber + brAddress);
                     
-                    System.out.println(instruction);
+                    instructionsList.add(instruction);
                 }
                 else if(opcodeToInstruction.containsKey(binaryInstruction.substring(0,8))){
-                    System.out.println(opcodeToInstruction.get(binaryInstruction.substring(0,8)).name);
+                    instruction = getCBTypeInstruction(opcodeToInstruction.get(binaryInstruction.substring(0,8)).name, binaryInstruction, lineNumber, linesWithLabelsHashSet);
+                    instructionsList.add(instruction);
                 }
                 else if(opcodeToInstruction.containsKey(binaryInstruction.substring(0,10))){
                     instruction = getITypeInstruction(opcodeToInstruction.get(binaryInstruction.substring(0,10)).name, binaryInstruction);
 
-                    System.out.println(instruction);
+                    instructionsList.add(instruction);
                 }
                 else if(opcodeToInstruction.containsKey(binaryInstruction.substring(0,11))){
                     String instructionName = opcodeToInstruction.get(binaryInstruction.substring(0,11)).name;
@@ -83,11 +83,18 @@ public class assignment2{
                         instruction = getRTypeInstruction(instructionName, binaryInstruction);
                     }
 
-                    System.out.println(instruction);
+                    instructionsList.add(instruction);
                 }
-
-                labelCount = lineNumberToLabel.size();
+                lineNumber++;
             }  
+
+            for(int i = 0; i < instructionsList.size(); i++){
+                if(linesWithLabelsHashSet.contains(i)){
+                    System.out.println("label" + i + ":");
+                }
+                System.out.println(instructionsList.get(i));
+            }
+
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -97,7 +104,7 @@ public class assignment2{
 
     private static String getRTypeInstruction(String instructionName, String binaryInstruction){
         int rm = Integer.parseInt(binaryInstruction.substring(11, 16), 2);
-        int shamt = Integer.parseInt(binaryInstruction.substring(16, 22), 2);
+        int shamt = binary2ComplimentToInt(binaryInstruction.substring(16, 22));
         int rn = Integer.parseInt(binaryInstruction.substring(22, 27), 2);
         int rd = Integer.parseInt(binaryInstruction.substring(27), 2);
         
@@ -107,7 +114,7 @@ public class assignment2{
         } else if (instructionName == "BR") {
             instruction = instructionName + " " + numberToRegister(rn);
         } else if (instructionName == "PRNT") {
-            instruction = "PRNT";
+            instruction = "PRNT " + numberToRegister(Integer.parseInt(binaryInstruction.substring(27), 2));
         } else if (instructionName == "PRNL") {
             instruction = "PRNL";
         } else if (instructionName == "DUMP") {
@@ -122,7 +129,7 @@ public class assignment2{
     }
 
     private static String getITypeInstruction(String instructionName, String binaryInstruction){
-        int aluImmediate = Integer.parseInt(binaryInstruction.substring(10, 22), 2);
+        int aluImmediate = binary2ComplimentToInt(binaryInstruction.substring(10, 22));
         int rn = Integer.parseInt(binaryInstruction.substring(22, 27), 2);
         int rd = Integer.parseInt(binaryInstruction.substring(27), 2);
 
@@ -131,38 +138,82 @@ public class assignment2{
         return instruction;
     }
 
-    private static String getCBTypeInstruction(String instructionName, String binaryInstruction, int lineNumber, int labelCount, HashMap<Integer, String> lineNumberToLabel){
-        //todo
-        return "";
+    private static String getCBTypeInstruction(String instructionName, String binaryInstruction, int lineNumber, HashSet<Integer> linesWithLabelsHashSet){
+        if(instructionName.equals("B.")){
+            int condition = Integer.parseInt(binaryInstruction.substring(28), 2);
+            switch (condition) {
+                case 0: instructionName += "EQ";
+                         break;
+                case 1: instructionName += "NE";
+                         break;
+                case 2: instructionName += "HS";
+                         break;
+                case 3: instructionName += "LO";
+                         break;
+                case 4: instructionName += "MI";
+                         break;
+                case 5: instructionName += "PL";
+                         break;
+                case 6: instructionName += "VS";
+                         break;
+                case 7: instructionName += "VC";
+                         break;
+                case 8: instructionName += "HI";
+                         break;
+                case 9: instructionName += "LS";
+                         break;
+                case 10: instructionName += "GE";
+                         break;
+                case 11: instructionName += "LT";
+                         break;
+                case 12: instructionName += "GT";
+                         break;
+                case 13: instructionName += "LE";
+                         break;
+            }
+        }
+        else if(instructionName.equals("CBZ") || instructionName.equals("CBNZ")){
+            instructionName += (" " + numberToRegister(Integer.parseInt(binaryInstruction.substring(27), 2)) + ",");
+        }
+        int brAddress = binary2ComplimentToInt(binaryInstruction.substring(8, 27));
+        addLabel(linesWithLabelsHashSet, (brAddress + lineNumber));
+        return instructionName + " label" + (brAddress + lineNumber);
     }
 
     private static String getDTypeInstruction(String instructionName, String binaryInstruction){
-        int dtAddress = Integer.parseInt(binaryInstruction.substring(11, 20), 2);
+        int dtAddress = binary2ComplimentToInt(binaryInstruction.substring(11, 20));
         int rn = Integer.parseInt(binaryInstruction.substring(22, 27), 2);
         int rt = Integer.parseInt(binaryInstruction.substring(27), 2);
 
         String instruction = instructionName + " " + numberToRegister(rt) + ", [" + numberToRegister(rn) + ", #" + dtAddress + "]";
-
         return instruction;
     }
 
-    /**
-     * checks to see if hashmap has label at the needed labelLineNumber
-     * if it does not add to hashmap
-     * return the label string
-     * 
-     * labelLineNumber = line of branch instruction + offset
-     */
-    private static String getLabel(HashMap<Integer, String> lineNumberToLabel, int labelLineNumber, int labelCount){
-        String label = lineNumberToLabel.get(labelLineNumber);
-
-        if (label == null) {
-            label = "label" + labelCount;
-            lineNumberToLabel.put(labelLineNumber, label);
-        }
-
-        return label;
+    private static void addLabel(HashSet<Integer> linesWithLabelsHashSet, int line){
+        linesWithLabelsHashSet.add(line);
     }
+
+    private static int binary2ComplimentToInt(String binaryInt) {
+        if (binaryInt.charAt(0) == '1') {
+            String invertedInt = invertDigits(binaryInt);
+            int decimalValue = Integer.parseInt(invertedInt, 2);
+            
+            decimalValue = (decimalValue + 1) * -1;
+            return decimalValue;
+        } 
+        else {
+            return Integer.parseInt(binaryInt, 2);
+        }
+    }
+    
+    private static String invertDigits(String binaryInt) {
+        String result = binaryInt;
+        result = result.replace("0", " ");
+        result = result.replace("1", "0");
+        result = result.replace(" ", "1");
+        return result;
+    }
+    
 
     private static String numberToRegister(int registerNumber) {
         String registerName;
